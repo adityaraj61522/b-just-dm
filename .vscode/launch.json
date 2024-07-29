@@ -1,0 +1,68 @@
+{
+
+  "version": "0.2.0",
+
+  "configurations": [
+        {
+              "type": "node-terminal",
+              "name": "staging",
+              "request": "launch",
+              "command": "npm start",
+              "cwd": "${workspaceFolder}"
+        },
+        {
+              "type": "node-terminal",
+              "name": "prod",
+              "request": "launch",
+              "command": "NODE_ENV=prod node server.js",
+              "cwd": "${workspaceFolder}/mmtapis"
+        }
+  ]
+}
+
+// {
+//       "version": "0.2.0",
+//       "compounds": [
+//         {
+//           "name": "Launch All",
+//           "configurations": [
+//             "Launch Node.js Server",
+//             "Launch Angular Client",
+//             "Launch Angular Dashboard"
+//           ]
+//         }
+//       ],
+//       "configurations": [
+//         {
+//           "name": "Launch Node.js Server",
+//           "type": "node",
+//           "request": "launch",
+//           "program": "${workspaceFolder}/mmtapis/server.js", // Adjust the path to your server entry file if necessary
+//           "cwd": "${workspaceFolder}/mmtapis",
+//           "runtimeExecutable": "npm",
+//           "runtimeArgs": [
+//             "start"
+//           ],
+//           "port": 7001,
+//           "console": "integratedTerminal",
+//           "internalConsoleOptions": "neverOpen"
+//         },
+//         {
+//           "name": "Launch Angular Client",
+//           "type": "pwa-chrome",
+//           "request": "launch",
+//           "url": "http://localhost:4200",
+//           "webRoot": "${workspaceFolder}/mmt-client",
+//           "preLaunchTask": "ng serve - client"
+//         },
+//         {
+//           "name": "Launch Angular Dashboard",
+//           "type": "pwa-chrome",
+//           "request": "launch",
+//           "url": "http://localhost:5200",
+//           "webRoot": "${workspaceFolder}/mmt-dashboard",
+//           "preLaunchTask": "ng serve - dashboard"
+//         }
+//       ]
+//     }
+    
