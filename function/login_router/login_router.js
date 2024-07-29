@@ -10,15 +10,18 @@ dotenv.config();
 const CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
 const CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
 const REDIRECT_URI = process.env.LINKEDIN_REDIRECT_URI;
-
-const SCOPE = "openid profile email";
+const SCOPE = process.env.SCOPE;
+const TOKEN_URL = process.env.TOKEN_URL;
+const PROFILE_URL = process.env.PROFILE_URL;
 const AUTH_URL = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}`;
-const TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken";
-const PROFILE_URL = "https://api.linkedin.com/v2/userinfo";
 
 // Step 1: Redirect user to LinkedIn for authentication
 exports.loginViaLinkdin = function (req, res) {
-  res.send(200, {code:200, status:"SUCCESS", location: AUTH_URL });
+  res.send(200, {
+    code: 200,
+    status: "SUCCESS",
+    location: AUTH_URL
+  });
 };
 
 // Step 2: Handle the callback from LinkedIn
@@ -39,8 +42,7 @@ exports.loginViaLinkdinCallback = async function (req, res) {
         redirect_uri: REDIRECT_URI,
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
-      }),
-      {
+      }), {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -61,11 +63,15 @@ exports.loginViaLinkdinCallback = async function (req, res) {
     if (profileData && profileData.sub) {
       let userExists = await checkUserProfileSub(profileData);
       if (!userExists || userExists.status === "FAILURE")
-        throw { status: "FAILURE" };
+        throw {
+          status: "FAILURE"
+        };
       if (userExists && !userExists.userExists) {
         let insertUser = await insertUserToDb(profileData);
         if (!insertUser || insertUser.status === "FAILURE")
-          throw { status: "FAILURE" };
+          throw {
+            status: "FAILURE"
+          };
         console.log("user inserted successfully");
       }
     }
@@ -123,12 +129,19 @@ async function insertUserToDb(profileData) {
     `;
 
       const queryRes = await db.executeQuery(insertUserQuery, userDataObj);
-      if (!queryRes) throw { status: "FAILURE" };
+      if (!queryRes) throw {
+        status: "FAILURE"
+      };
       console.log(queryRes);
-      resolve({ status: "SUCCESS", message: "user successfully saved to db" });
+      resolve({
+        status: "SUCCESS",
+        message: "user successfully saved to db"
+      });
     } catch (e) {
       console.error("FAILED to insert user to DB" + e);
-      reject({ status: "FAILURE" });
+      reject({
+        status: "FAILURE"
+      });
     }
   });
 }
@@ -138,28 +151,35 @@ async function checkUserProfileSub(profileData) {
     try {
       const insertUserQuery = `SELECT * from just_dm_user where profile_sub  = '${profileData.sub}'`;
       const queryRes = await db.executeQuery(insertUserQuery, []);
-      if (!queryRes) throw { status: "FAILURE" };
+      if (!queryRes) throw {
+        status: "FAILURE"
+      };
       console.log(queryRes);
       let userExists = false;
       if (queryRes.length > 0) userExists = true;
-      resolve({ status: "SUCCESS", userExists: userExists });
+      resolve({
+        status: "SUCCESS",
+        userExists: userExists
+      });
     } catch (e) {
       console.error("FAILED to insert user to DB" + e);
-      reject({ status: "FAILURE" });
+      reject({
+        status: "FAILURE"
+      });
     }
   });
 }
 
 exports.loginViaLinkdinCallback = async function (req, res) {
-  try{
-    let userData= {};
+  try {
+    let userData = {};
     jwt.verify(req.headers.token, process.env.JWT_SECRET_KEY, (err, decoded) => {
       if (err) {
         // Handle the error (e.g., token expired, invalid signature, etc.)
         console.error('Token verification failed:', err.message);
       } else {
         // Token is valid, decoded contains the payload
-        userData=decoded.data;
+        userData = decoded.data;
         console.log(decoded);
       }
     });

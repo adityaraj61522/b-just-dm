@@ -11,7 +11,7 @@ exports.getChatList = function (forUserId) {
                                 jdu.name,
                                 jdc.chat_text as chatText,
                                 jdc.chat_img as chatImg,
-                                jdc.chat_date as chatDate
+                                DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate
                             from
                                 just_dm_chat jdc
                             inner join just_dm_user jdu on
@@ -56,23 +56,21 @@ exports.getChatList = function (forUserId) {
 }
 
 
-exports.getChatsByUserId = function (forUserId) {
+exports.getChatsByUserId = function (roomId, forUserId) {
     return new Promise(async (resolve, reject) => {
         try {
             let getChatQuery = `SELECT
                                 jdc.sender_id,
                                 jdc.receiver_id,
                                 jdc.chat_text as chatText,
-                                DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as date,
+                                DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate,
                                 CASE
                                     WHEN jdc.sender_id = ${forUserId} THEN 'Y'
                                     ELSE 'N'
                                 END as sent
                             FROM
                                 just_dm_chat jdc
-                            INNER JOIN just_dm_chat_room jdcr ON
-                                jdcr.room_id = jdc.room_id
-                                AND (jdcr.participant_1 = ${forUserId} OR jdcr.participant_2 = ${forUserId})
+                            WHERE jdc.room_id = ${roomId}
                             ORDER BY
                                 jdc.chat_date;`;
             console.log('getChatQuery ============ ' + getChatQuery);
