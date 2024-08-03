@@ -13,18 +13,18 @@ exports.getChatList = function (forUserId) {
                                 jdc.chat_img as chatImg,
                                 DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate
                             from
-                                just_dm_chat jdc
-                            inner join just_dm_user jdu on
+                                linket_chat jdc
+                            inner join linket_user jdu on
                                 jdu.user_id = jdc.sender_id
                                 and jdu.user_id != ${forUserId}
-                            inner join just_dm_chat_room jdcr on
+                            inner join linket_chat_room jdcr on
                                 (jdcr.participant_1 = ${forUserId} or jdcr.participant_2 = ${forUserId})
                             inner join (
                                 select
                                     jdc.sender_id,
                                     max(jdc.chat_date) as max_chat_date
                                 from
-                                    just_dm_chat jdc
+                                    linket_chat jdc
                                 where
                                     jdc.receiver_id = ${forUserId} or jdc.sender_id = ${forUserId}
                                 group by
@@ -69,7 +69,7 @@ exports.getChatsByUserId = function (roomId, forUserId) {
                                     ELSE 'N'
                                 END as sent
                             FROM
-                                just_dm_chat jdc
+                                linket_chat jdc
                             WHERE jdc.room_id = ${roomId}
                             ORDER BY
                                 jdc.chat_date;`;

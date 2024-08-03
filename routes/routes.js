@@ -3,6 +3,7 @@ var chatRouter = require('../function/chat_router/chat_router');
 const authMiddleware = require('../middleware/authMiddleware');
 
 module.exports = function (app) {
+    app.get("/api/health", loginRouter.healthCheck);
     app.get("/api/login", loginRouter.loginViaLinkdin);
     app.get("/auth/linkedin/callback", loginRouter.loginViaLinkdinCallback);
     app.get("/api/getUserDetails", loginRouter.loginViaLinkdinCallback);

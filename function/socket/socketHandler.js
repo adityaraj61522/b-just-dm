@@ -61,7 +61,7 @@ async function saveChat(chatObj) {
     return new Promise(async (resolve, reject) => {
         try {
             chatObj.chatImg = chatObj.chatImg ? chatObj.chatImg : 'null';
-            const saveChatQuery = `INSERT INTO just_dm_chat (room_id, sender_id, receiver_id, chat_text, chat_img) VALUES (${chatObj.roomId}, ${chatObj.senderId}, ${chatObj.receiverId}, '${chatObj.chatText}', ${chatObj.chatImg})`;
+            const saveChatQuery = `INSERT INTO linket_chat (room_id, sender_id, receiver_id, chat_text, chat_img) VALUES (${chatObj.roomId}, ${chatObj.senderId}, ${chatObj.receiverId}, '${chatObj.chatText}', ${chatObj.chatImg})`;
             const queryRes = await db.executeQuery(saveChatQuery);
             if (!queryRes) {
                 console.error('Failed to insert message:', err.stack);
@@ -84,7 +84,7 @@ async function saveChat(chatObj) {
 async function markAsRead(chatObj) {
     return new Promise(async (resolve, reject) => {
         try {
-            const markAsReadQuery = `update just_dm_chat set chat_read = 1 where room_id = ${chatObj.roomId} and sender_id = ${chatObj.senderId} and receiver_id =${chatObj.receiverId}`;
+            const markAsReadQuery = `update linket_chat set chat_read = 1 where room_id = ${chatObj.roomId} and sender_id = ${chatObj.senderId} and receiver_id =${chatObj.receiverId}`;
             const queryRes = await db.executeQuery(markAsReadQuery);
             if (!queryRes) {
                 console.error('Failed to markAsRead message:', err.stack);

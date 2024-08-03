@@ -15,6 +15,13 @@ const TOKEN_URL = process.env.TOKEN_URL;
 const PROFILE_URL = process.env.PROFILE_URL;
 const AUTH_URL = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}`;
 
+exports.healthCheck = function (req, res) {
+  res.send(200, {
+    code: 200,
+    status: "SUCCESS",
+    data: "Linket API running fine",
+  });
+};
 // Step 1: Redirect user to LinkedIn for authentication
 exports.loginViaLinkdin = function (req, res) {
   res.send(200, {
@@ -115,7 +122,7 @@ async function insertUserToDb(profileData) {
       ];
 
       const insertUserQuery = `
-      INSERT INTO just_dm_user (
+      INSERT INTO linket_user (
         profile_sub,
         email_verified,
         name,
@@ -149,7 +156,7 @@ async function insertUserToDb(profileData) {
 async function checkUserProfileSub(profileData) {
   return new Promise(async (resolve, reject) => {
     try {
-      const insertUserQuery = `SELECT * from just_dm_user where profile_sub  = '${profileData.sub}'`;
+      const insertUserQuery = `SELECT * from linket_user where profile_sub  = '${profileData.sub}'`;
       const queryRes = await db.executeQuery(insertUserQuery, []);
       if (!queryRes) throw {
         status: "FAILURE"
