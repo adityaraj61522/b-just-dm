@@ -10,17 +10,35 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const socketHandler = require('./function/socket/socketHandler')
 // CORS configuration options
+const allowedOrigins = ["http://localhost:8000", "https://linket.chat"];
+
 const corsOptions = {
-  origin: '*',
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Content-Type,Authorization",
+  allowedHeaders: "Content-Type,Authorization,userid,token,sec-ch-ua,sec-ch-ua-mobile,sec-ch-ua-platform,Referer",
   optionsSuccessStatus: 200,
 };
+
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", allowedOrigins.join(', '));
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  next();
+});
+
 
 socketHandler(io);
 
 // Use CORS middleware with specified options
-app.use(cors(corsOptions));
 
 app.all("/", [require("./routes/routes")]);
 
