@@ -11,7 +11,7 @@ const io = socketIo(server);
 const socketHandler = require('./function/socket/socketHandler')
 // CORS configuration options
 const corsOptions = {
-  origin: ["http://localhost:8000", "https://linket.chat", "https://api.linket.chat"],
+  origin: '*',
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: "Content-Type,Authorization",
   optionsSuccessStatus: 200,
