@@ -21,7 +21,7 @@ const corsOptions = {
     }
   },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: "Content-Type,Authorization,userid,token,sec-ch-ua,sec-ch-ua-mobile,sec-ch-ua-platform,Referer",
+  allowedHeaders: "*",
   optionsSuccessStatus: 200,
 };
 
