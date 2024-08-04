@@ -17,7 +17,9 @@ const corsOptions = {
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
+      console.log("REJECTED BY CORS=========== " + origin);
       callback(new Error("Not allowed by CORS"));
+
     }
   },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -29,9 +31,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", allowedOrigins.join(', '));
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Headers", "*");
   next();
 });
 
