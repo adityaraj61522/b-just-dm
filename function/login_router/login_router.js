@@ -86,7 +86,7 @@ exports.loginViaLinkdinCallback = async function (req, res) {
       profileData,
       isAuthenticated
     );
-    res.redirect("http://localhost:8000/#/getLinkdinUser/" + sessionToken.token);
+    res.redirect(process.env.FLUTTER_URL + "/#/getLinkdinUser/" + sessionToken.token);
     // res.status(200).send({
     //   status: "SUCCESS",
     //   sessionToken: sessionToken,
@@ -177,33 +177,27 @@ async function checkUserProfileSub(profileData) {
   });
 }
 
-exports.loginViaLinkdinCallback = async function (req, res) {
+exports.getUserDetails = async function (req, res) {
   try {
-    let userData = {};
-    jwt.verify(req.headers.token, process.env.JWT_SECRET_KEY, (err, decoded) => {
-      if (err) {
-        // Handle the error (e.g., token expired, invalid signature, etc.)
-        console.error('Token verification failed:', err.message);
-      } else {
-        // Token is valid, decoded contains the payload
-        userData = decoded.data;
-        console.log(decoded);
-      }
-    });
-    res.status(200).send({
-      status: "SUCCESS",
-      data: userData,
-      message: "User authenticated and data stored successfully",
-    });
-  } catch (error) {
-    console.error(
-      "Error exchanging code for token or fetching profile data:",
-      error
-    );
+    if (req.headers.token && req.headers.userDetails) {
+      res.status(200).send({
+        code: 200,
+        status: "SUCCESS",
+        message: "User authenticated and data stored successfully",
+        userData: req.headers.userDetails,
+        isNew: !req.headers.userDetails.rate || req.headers.userDetails.rate === null ? true : false,
+      });
+    } else {
+      throw ({
+        status: "FAILURE",
+        message: "No Token Found!!!"
+      })
+    }
+  } catch (e) {
     res.status(500).send({
+      code: 500,
       status: "FAILURE",
-      message: "Authentication failed",
-      isAuthenticated: isAuthenticated,
+      message: "Failed to get userData"
     });
   }
-};
+}

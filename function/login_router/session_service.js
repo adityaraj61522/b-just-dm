@@ -11,19 +11,38 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 exports.getSessionToken = async function (profileData, isAuthenticated) {
   return new Promise((resolve, reject) => {
     try {
-      const token = jwt.sign(
-        {
+      const token = jwt.sign({
           exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 10,
           data: profileData,
         },
         JWT_SECRET_KEY
       );
-      if (!token) throw { status: "FAILURE" };
+      if (!token) throw {
+        status: "FAILURE"
+      };
       isAuthenticated = true;
-      resolve({ token: token, isAuthenticated: isAuthenticated });
+      resolve({
+        token: token,
+        isAuthenticated: isAuthenticated
+      });
     } catch (e) {
       console.log("Error while getting JWT token" + e);
-      reject({ status: "FAILURE", error: e, isAuthenticated: isAuthenticated });
+      reject({
+        status: "FAILURE",
+        error: e,
+        isAuthenticated: isAuthenticated
+      });
     }
   });
 };
+
+exports.decodeToken = function (token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, JWT_SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(decoded);
+    });
+  });
+}

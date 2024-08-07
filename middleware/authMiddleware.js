@@ -7,9 +7,25 @@ dotenv.config();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
-const verifyToken = promisify(jwt.verify); // Convert jwt.verify to return a promise
+function verifyToken(token, secretOrPublicKey) {
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, secretOrPublicKey, (err, decoded) => {
+            if (err) {
+                reject({
+                    isValid: false
+                });
+            } else {
+                resolve({
+                    isValid: true,
+                    decoded: decoded,
+                });
+            }
+        });
+    });
+}
 
-const authMiddleware = async (req, res, next) => {
+
+exports.authMiddleware = async function (req, res, next) {
     try {
         const token = req.headers.token;
         if (!token) {
@@ -21,8 +37,12 @@ const authMiddleware = async (req, res, next) => {
             });
         }
         if (token !== process.env.TOKEN_BYPASS_TEXT) {
-            const decoded = await verifyToken(token, JWT_SECRET_KEY); // Replace 'your_secret_key' with your actual secret key
-            req.body.user = decoded; // Attach decoded token data to request object
+            const decoded = await verifyToken(token, JWT_SECRET_KEY);
+            if (decoded && decoded.isValid && decoded.decoded && decoded.decoded.data) {
+                req.headers.userDetails = decoded.decoded.data;
+            } else {
+                throw ({});
+            }
         }
         next();
     } catch (error) {
@@ -34,5 +54,3 @@ const authMiddleware = async (req, res, next) => {
         });
     }
 };
-
-module.exports = authMiddleware;
