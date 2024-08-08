@@ -2,6 +2,29 @@ const axios = require('axios');
 const chatService = require('./chat_router');
 const db = require("../../config/dbConnection");
 
+exports.setRate = function (forUserId, rate) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let setRateQuery = `UPDATE linket_user SET rate = ${rate} where user_id = ${forUserId}`;
+            console.log('setRateQuery ============ ' + setRateQuery);
+            const queryRes = await db.executeQuery(setRateQuery);
+            if (!queryRes) throw {
+                status: "FAILURE"
+            };
+            console.log(queryRes);
+            resolve({
+                status: "SUCCESS",
+                data: queryRes,
+            });
+        } catch (e) {
+            reject({
+                status: "FAILURE",
+                message: "Error while getting setRate error  = " + e
+            })
+        }
+    });
+}
+
 exports.getChatList = function (forUserId) {
     return new Promise(async (resolve, reject) => {
         try {

@@ -17,6 +17,30 @@ const handleError = (functionName, e, response) => {
     });
 };
 
+exports.setRate = async function (request, response) {
+    try {
+        if (!request.headers.rate) {
+            throw {
+                code: 400,
+                status: "BAD_REQUEST"
+            };
+        }
+        let setRateRes = await chatService.setRate(request.headers.userid, request.headers.rate);
+        if (!setRateRes) {
+            throw {
+                status: "FAILURE",
+                error: setRateRes
+            };
+        }
+        response.status(200).send({
+            code: 200,
+            status: "SUCCESS"
+        });
+    } catch (e) {
+        handleError('setRate', e, response);
+    }
+};
+
 exports.getChatList = async function (request, response) {
     try {
         if (!request.headers.userid) {
