@@ -34,7 +34,8 @@ exports.getChatList = function (forUserId) {
                                 jdu.name,
                                 jdc.chat_text as chatText,
                                 jdc.chat_img as chatImg,
-                                DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate
+                                DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate,
+                                2 as unreadCount
                             from
                                 linket_chat jdc
                             inner join linket_user jdu on

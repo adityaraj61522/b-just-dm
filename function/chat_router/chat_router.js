@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const db = require("../../config/dbConnection");
 const jwt = require("jsonwebtoken");
 const chatService = require('./chat_service');
+const crypto = require('../common/crypto')
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ exports.setRate = async function (request, response) {
                 status: "BAD_REQUEST"
             };
         }
-        let setRateRes = await chatService.setRate(request.headers.userid, request.headers.rate);
+        let setRateRes = await chatService.setRate(request.headers.userDetails.user_id, request.headers.rate);
         if (!setRateRes) {
             throw {
                 status: "FAILURE",
@@ -43,18 +44,22 @@ exports.setRate = async function (request, response) {
 
 exports.getChatList = async function (request, response) {
     try {
-        if (!request.headers.userid) {
+        if (!request.headers.userDetails.user_id) {
             throw {
                 code: 400,
                 status: "BAD_REQUEST"
             };
         }
-        let chatList = await chatService.getChatList(request.headers.userid);
+        let chatList = await chatService.getChatList(request.headers.userDetails.user_id);
         if (!chatList || chatList.status !== "SUCCESS" || !chatList.data || chatList.data.length < 1) {
             throw {
                 status: "FAILURE",
                 error: chatList
             };
+        }
+        for (let chat of chatList.data) {
+            chat.roomId = crypto.encrypt(chat.roomId);
+            chat.userId = crypto.encrypt(chat.userId);
         }
         response.status(200).send({
             code: 200,
@@ -66,15 +71,15 @@ exports.getChatList = async function (request, response) {
     }
 };
 
-exports.getChatsByUserId = async function (request, response) {
+exports.getChatsByRoomId = async function (request, response) {
     try {
-        if (!request.headers.userid || !request.headers.roomid) {
+        if (!request.headers.roomid) {
             throw {
                 code: 400,
                 status: "BAD_REQUEST"
             };
         }
-        let chatList = await chatService.getChatsByUserId(request.headers.roomid, request.headers.userid);
+        let chatList = await chatService.getChatsByUserId(crypto.decrypt(request.headers.roomid), request.headers.userDetails.user_id);
         if (!chatList || chatList.status !== "SUCCESS" || !chatList.data || chatList.data.length < 1) {
             throw {
                 status: "FAILURE",
@@ -82,7 +87,10 @@ exports.getChatsByUserId = async function (request, response) {
             };
         }
         for (let chat of chatList.data) {
-            chat.sent = chat.sent === 'Y' ? true : false
+            chat.sent = chat.sent === 'Y' ? true : false;
+            chat.sender_id = crypto.encrypt(chat.sender_id);
+            chat.receiver_id = crypto.encrypt(chat.receiver_id);
+
         }
         response.status(200).send({
             code: 200,

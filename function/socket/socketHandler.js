@@ -1,5 +1,6 @@
 const clients = new Set();
 const db = require("../../config/dbConnection");
+const crypto = require("../common/crypto")
 
 
 module.exports = (io) => {
@@ -16,9 +17,9 @@ module.exports = (io) => {
                 receiverId
             } = roomInfo;
             const chatObj = {
-                roomId,
-                senderId,
-                receiverId
+                roomId: crypto.decrypt(roomId),
+                senderId: crypto.decrypt(senderId),
+                receiverId: crypto.decrypt(receiverId)
             };
             let markRead = await markAsRead(chatObj);
             if (!markRead || markRead.status !== 'SUCCESS') {
@@ -37,11 +38,11 @@ module.exports = (io) => {
                 chatImg
             } = message;
             const chatObj = {
-                roomId,
-                senderId,
-                receiverId,
-                chatText,
-                chatImg
+                roomId: crypto.decrypt(roomId),
+                senderId: crypto.decrypt(senderId),
+                receiverId: crypto.decrypt(receiverId),
+                chatText: chatText,
+                chatImg: chatImg
             };
             let saveChatMessage = await saveChat(chatObj);
             if (!saveChatMessage || saveChatMessage.status !== 'SUCCESS') {

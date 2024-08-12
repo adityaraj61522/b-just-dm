@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken');
-const {
-    promisify
-} = require('util');
+const db = require("../config/dbConnection");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -39,7 +37,14 @@ exports.authMiddleware = async function (req, res, next) {
         if (token !== process.env.TOKEN_BYPASS_TEXT) {
             const decoded = await verifyToken(token, JWT_SECRET_KEY);
             if (decoded && decoded.isValid && decoded.decoded && decoded.decoded.data) {
-                req.headers.userDetails = decoded.decoded.data;
+                let userdata = await getUserBySub(decoded.decoded.data.sub);
+                if (!userdata || !userdata.data || userdata.data.length != 1) {
+                    throw ({
+                        status: "FAILURE"
+                    })
+                } else {
+                    req.headers.userDetails = userdata.data[0];
+                }
             } else {
                 throw ({});
             }
@@ -54,3 +59,25 @@ exports.authMiddleware = async function (req, res, next) {
         });
     }
 };
+
+async function getUserBySub(sub) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let getUserQuery = `SELECT * from linket_user where profile_sub = '${sub}'`;
+            const queryRes = await db.executeQuery(getUserQuery);
+            if (!queryRes) throw {
+                status: "FAILURE"
+            };
+            console.log(queryRes);
+            resolve({
+                status: "SUCCESS",
+                data: queryRes
+            });
+        } catch (e) {
+            console.error("FAILED to get user data from DB" + e);
+            reject({
+                status: "FAILURE"
+            });
+        }
+    });
+}

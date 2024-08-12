@@ -11,5 +11,5 @@ module.exports = function (app) {
     app.get("/api/setRate", middleware.authMiddleware, chatRouter.setRate);
     // Chat APis
     app.get("/api/getChatList", middleware.authMiddleware, chatRouter.getChatList);
-    app.get("/api/getChatsByUserId", middleware.authMiddleware, chatRouter.getChatsByUserId);
+    app.get("/api/getChatsByRoomId", middleware.authMiddleware, chatRouter.getChatsByRoomId);
 }

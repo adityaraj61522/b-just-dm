@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const db = require("../../config/dbConnection");
 const jwt = require("jsonwebtoken");
 const sessionService = require("./session_service");
+const crypto = require('../common/crypto')
 
 dotenv.config();
 
@@ -184,7 +185,7 @@ exports.getUserDetails = async function (req, res) {
         code: 200,
         status: "SUCCESS",
         message: "User authenticated and data stored successfully",
-        userData: req.headers.userDetails,
+        userData: processUserData(req.headers.userDetails),
         isNew: !req.headers.userDetails.rate || req.headers.userDetails.rate === null ? true : false,
       });
     } else {
@@ -199,5 +200,22 @@ exports.getUserDetails = async function (req, res) {
       status: "FAILURE",
       message: "Failed to get userData"
     });
+  }
+}
+
+
+function processUserData(userData) {
+  return {
+    id: crypto.encrypt(userData.user_id),
+    sub: userData.profile_sub,
+    emailVerified: userData.email_verified ? true : false,
+    name: userData.name,
+    localeCountry: userData.locale_country,
+    localeLanguage: userData.locale_language,
+    givenName: userData.given_name,
+    familyName: userData.family_name,
+    email: userData.email,
+    picture: userData.picture,
+    rate: userData.rate,
   }
 }
