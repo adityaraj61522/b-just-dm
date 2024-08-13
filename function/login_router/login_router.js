@@ -217,5 +217,6 @@ function processUserData(userData) {
     email: userData.email,
     picture: userData.picture,
     rate: userData.rate,
+    balance: userData.balance
   }
 }

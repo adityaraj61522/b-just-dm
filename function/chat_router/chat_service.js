@@ -94,7 +94,7 @@ exports.getChatsByUserId = function (roomId, forUserId) {
                                 END as sent
                             FROM
                                 linket_chat jdc
-                            WHERE jdc.room_id = ${roomId}
+                            WHERE jdc.room_id = ${Number(roomId)}
                             ORDER BY
                                 jdc.chat_date;`;
             console.log('getChatQuery ============ ' + getChatQuery);
