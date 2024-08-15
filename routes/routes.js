@@ -1,5 +1,6 @@
 var loginRouter = require('../function/login_router/login_router');
 var chatRouter = require('../function/chat_router/chat_router');
+var paymentRouter = require('../function/payment/payment_router');
 const middleware = require('../middleware/authMiddleware');
 
 module.exports = function (app) {
@@ -12,4 +13,8 @@ module.exports = function (app) {
     // Chat APis
     app.get("/api/getChatList", middleware.authMiddleware, chatRouter.getChatList);
     app.get("/api/getChatsByRoomId", middleware.authMiddleware, chatRouter.getChatsByRoomId);
+
+
+    app.get("/api/addBalance", middleware.authMiddleware, paymentRouter.addBalance);
+    app.get("/api/withdrawBalance", middleware.authMiddleware, paymentRouter.withdrawBalance);
 }

@@ -50,6 +50,15 @@ exports.getChatList = async function (request, response) {
                 status: "BAD_REQUEST"
             };
         }
+        if (request.headers.chatwith && request.headers.chatwith != '' && request.headers.chatwith != null) {
+            let newRoomCreationRes = await chatService.newRoomCreation(request, request.headers.chatwith);
+            if (!newRoomCreationRes) {
+                throw ({
+                    status: "FAILURE",
+                    message: "Error wwhile creating room!!!!!!!"
+                })
+            }
+        }
         let chatList = await chatService.getChatList(request.headers.userDetails.user_id);
         if (!chatList || chatList.status !== "SUCCESS" || !chatList.data || chatList.data.length < 1) {
             throw {
@@ -80,7 +89,7 @@ exports.getChatsByRoomId = async function (request, response) {
             };
         }
         let chatList = await chatService.getChatsByUserId(crypto.decrypt(request.headers.roomid), request.headers.userDetails.user_id);
-        if (!chatList || chatList.status !== "SUCCESS" || !chatList.data || chatList.data.length < 1) {
+        if (!chatList || chatList.status !== "SUCCESS" || !chatList.data) {
             throw {
                 status: "FAILURE",
                 error: chatList

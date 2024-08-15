@@ -110,6 +110,7 @@ exports.loginViaLinkdinCallback = async function (req, res) {
 async function insertUserToDb(profileData) {
   return new Promise(async (resolve, reject) => {
     try {
+      let userName = profileData.email.split('@')[0];
       const userDataObj = [
         profileData.sub,
         profileData.email_verified ? 1 : 0,
@@ -120,6 +121,7 @@ async function insertUserToDb(profileData) {
         profileData.family_name,
         profileData.email,
         profileData.picture,
+        userName
       ];
 
       const insertUserQuery = `
@@ -132,9 +134,9 @@ async function insertUserToDb(profileData) {
         given_name,
         family_name,
         email,
-        picture_url
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+        picture_url,
+        user_name
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
       const queryRes = await db.executeQuery(insertUserQuery, userDataObj);
       if (!queryRes) throw {
@@ -217,6 +219,7 @@ function processUserData(userData) {
     email: userData.email,
     picture: userData.picture,
     rate: userData.rate,
-    balance: userData.balance
+    balance: userData.balance,
+    userName: userData.user_name,
   }
 }

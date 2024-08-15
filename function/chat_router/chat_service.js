@@ -28,38 +28,45 @@ exports.setRate = function (forUserId, rate) {
 exports.getChatList = function (forUserId) {
     return new Promise(async (resolve, reject) => {
         try {
-            let getChatQuery = `select
-                                jdcr.room_id as roomId,
-                                jdu.user_id as userId,
-                                jdu.name,
-                                jdc.chat_text as chatText,
-                                jdc.chat_img as chatImg,
-                                DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate,
-                                2 as unreadCount
-                            from
-                                linket_chat jdc
-                            inner join linket_user jdu on
-                                jdu.user_id = jdc.sender_id
-                                and jdu.user_id != ${forUserId}
-                            inner join linket_chat_room jdcr on
-                                (jdcr.participant_1 = ${forUserId} or jdcr.participant_2 = ${forUserId})
-                            inner join (
-                                select
-                                    jdc.sender_id,
-                                    max(jdc.chat_date) as max_chat_date
-                                from
-                                    linket_chat jdc
-                                where
-                                    jdc.receiver_id = ${forUserId} or jdc.sender_id = ${forUserId}
-                                group by
-                                    jdc.sender_id
-                            ) latest_chat on
-                                jdc.sender_id = latest_chat.sender_id
-                                and jdc.chat_date = latest_chat.max_chat_date
-                            where
-                                jdc.room_id = jdcr.room_id
-                            group by
-                                jdcr.room_id, jdu.user_id, jdu.name, jdc.chat_text, jdc.chat_img, jdc.chat_date;`;
+            let getChatQuery = `SELECT
+                                lcr.room_id as roomId,
+                                lu.user_id as userId,
+                                lu.name,
+                                lu.user_name as userName,
+                                lc.chat_text as chatText,
+                                lc.chat_img as chatImg,
+                                DATE_FORMAT(lc.chat_date, '%d %b %y %l:%i %p') as chatDate,
+                                COUNT(lc2.chat_id) as unreadCount
+                            FROM
+                                linket_chat_room lcr
+                            INNER JOIN linket_user lu
+                                ON
+                                lu.user_id != ${forUserId}
+                                AND (lu.user_id = lcr.participant_1
+                                    OR lu.user_id = lcr.participant_2)
+                            LEFT JOIN linket_chat lc
+                                ON
+                                lc.room_id = lcr.room_id
+                                AND lc.chat_date = (
+                                SELECT
+                                    MAX(chat_date)
+                                FROM
+                                    linket_chat lc2
+                                WHERE
+                                    lc2.room_id = lc.room_id
+                                )
+                            LEFT JOIN linket_chat lc2 ON
+                                lc2.room_id = lcr.room_id
+                                AND lc2.chat_read = 0
+                                AND lc2.receiver_id = ${forUserId}
+                            WHERE
+                                (lcr.participant_1 = ${forUserId}
+                                    OR lcr.participant_2 = ${forUserId})
+                            GROUP BY
+                                lcr.room_id
+                            ORDER BY
+                                lc.chat_date,
+                                lcr.room_creation_date`;
             console.log('getChatQuery ============ ' + getChatQuery);
             const queryRes = await db.executeQuery(getChatQuery);
             if (!queryRes) throw {
@@ -111,6 +118,66 @@ exports.getChatsByUserId = function (roomId, forUserId) {
             reject({
                 status: "FAILURE",
                 message: "Error while getting getChatsByUserId error  = " + e
+            })
+        }
+    });
+}
+
+
+exports.newRoomCreation = function (request, chatWith) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let userExistenceQuery = `SELECT * from linket_user where user_name = '${chatWith}'`;
+            console.log('userExistenceQuery ============ ' + userExistenceQuery);
+            const userExistenceQueryRes = await db.executeQuery(userExistenceQuery);
+            if (!userExistenceQueryRes) {
+                throw {
+                    status: "FAILURE"
+                }
+            } else if (userExistenceQueryRes && userExistenceQueryRes.length < 1) {
+                console.error("The requested chat with user doesn't exist!!!!");
+                resolve({
+                    status: "USER_NOT_EXIST",
+                    message: "The requested chat with user doesn't exist!!!!"
+                });
+            } else {
+                let roomExistenceQuery = `SELECT * FROM linket_chat_room lcr INNER JOIN linket_user lu ON lu.user_name= '${chatWith}' WHERE (lcr.participant_1=lu.user_id OR lcr.participant_2=lu.user_id)`
+                const roomExistenceQueryRes = await db.executeQuery(roomExistenceQuery);
+                if (!roomExistenceQueryRes) {
+                    throw {
+                        status: "FAILURE"
+                    }
+                } else if (roomExistenceQueryRes && roomExistenceQueryRes.length < 1) {
+                    let createChatRoomQuery = "INSERT INTO linket_chat_room (participant_1,participant_2) VALUES (?,?)"
+                    let insertParams = [request.headers.userDetails.user_id, userExistenceQueryRes[0].user_id];
+                    const createChatRoomQueryRes = await db.executeQuery(createChatRoomQuery, insertParams);
+                    if (!createChatRoomQueryRes) {
+                        throw {
+                            status: "FAILURE"
+                        }
+                    } else {
+                        console.log("The requested chat room was created!!!!");
+                        resolve({
+                            status: "ROOM_CREATED_SUCCESSFULLY",
+                            message: "The requested chat room was created!!!!"
+                        });
+                    }
+                } else {
+                    resolve({
+                        status: "CHAT_ROOM_EXISTS",
+                        message: "Room Already Exists!!!!"
+                    });
+                }
+            }
+            console.log(queryRes);
+            resolve({
+                status: "SUCCESS",
+                data: queryRes,
+            });
+        } catch (e) {
+            reject({
+                status: "FAILURE",
+                message: "Error while newRoomCreation error  = " + e
             })
         }
     });
