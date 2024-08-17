@@ -30,9 +30,11 @@ exports.getChatList = function (forUserId) {
         try {
             let getChatQuery = `SELECT
                                 lcr.room_id as roomId,
+                                lcr.is_paid as isPaid,
                                 lu.user_id as userId,
                                 lu.name,
                                 lu.user_name as userName,
+                                lu.rate,
                                 lc.chat_text as chatText,
                                 lc.chat_img as chatImg,
                                 DATE_FORMAT(lc.chat_date, '%d %b %y %l:%i %p') as chatDate,

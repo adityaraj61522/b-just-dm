@@ -17,4 +17,7 @@ module.exports = function (app) {
 
     app.get("/api/addBalance", middleware.authMiddleware, paymentRouter.addBalance);
     app.get("/api/withdrawBalance", middleware.authMiddleware, paymentRouter.withdrawBalance);
+
+    app.get("/api/payToUnlockChat", middleware.authMiddleware, paymentRouter.payToUnlockChat);
+
 }

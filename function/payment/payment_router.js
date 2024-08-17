@@ -65,3 +65,27 @@ exports.withdrawBalance = async function (request, response) {
         handleError('addBalance', e, response);
     }
 };
+
+exports.payToUnlockChat = async function (request, response) {
+    try {
+        if (!request.headers.roomid) {
+            throw {
+                code: 400,
+                status: "BAD_REQUEST"
+            };
+        }
+        let payToUnlockChatRes = await paymentService.payToUnlockChat(request);
+        if (!payToUnlockChatRes) {
+            throw {
+                status: "FAILURE",
+                error: payToUnlockChatRes
+            };
+        }
+        response.status(200).send({
+            code: 200,
+            status: "SUCCESS"
+        });
+    } catch (e) {
+        handleError('addBalance', e, response);
+    }
+};

@@ -69,6 +69,7 @@ exports.getChatList = async function (request, response) {
         for (let chat of chatList.data) {
             chat.roomId = crypto.encrypt(chat.roomId);
             chat.userId = crypto.encrypt(chat.userId);
+            chat.isPaid = chat.isPaid ? true : false;
         }
         response.status(200).send({
             code: 200,

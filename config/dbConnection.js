@@ -60,3 +60,78 @@ exports.executeQuery = async function (query, params) {
         }
     })
 }
+
+
+exports.executeTransaction = async function (queryList, paramsList) {
+    return new Promise(async (resolve, reject) => {
+        const connection = await pool.getConnection();
+        try {
+            console.log('Database connection established successfully.');
+            try {
+                await connection.beginTransaction();
+            } catch (beginTransactionError) {
+                console.error('Error starting transaction:', beginTransactionError);
+                connection.release();
+                return reject({
+                    status: "FAILURE",
+                    message: `Failed while beginning transaction ${beginTransactionError}`
+                });
+            }
+            for (let i = 0; i < queryList.length; i++) {
+                const query = queryList[i];
+                const params = [];
+                if (paramsList && paramsList.length >= i) {
+                    params = paramsList[i];
+                }
+                try {
+                    const [results, fields] = await connection.execute(query, params);
+                    console.log('Query executed successfully:', results);
+                } catch (queryError) {
+                    console.error('Error executing query:', queryError);
+                    try {
+                        await connection.rollback();
+                    } catch (rollbackError) {
+                        console.error('Error during rollback:', rollbackError);
+                    }
+                    connection.release();
+                    return reject({
+                        status: "FAILURE",
+                        message: `Failed while beginning transaction ${queryError}`
+                    });
+                }
+            }
+            try {
+                await connection.commit();
+                console.log('Transaction committed successfully.');
+                resolve({
+                    status: "SUCCESS"
+                });
+            } catch (commitError) {
+                console.error('Error committing transaction:', commitError);
+                try {
+                    await connection.rollback();
+                } catch (rollbackError) {
+                    console.error('Error during rollback after commit failure:', rollbackError);
+                }
+                connection.release();
+                reject({
+                    status: "FAILURE",
+                    message: `Failed while committing transaction ${commitError}`
+                });
+            }
+
+        } catch (connectionError) {
+            console.error('Error establishing database connection:', connectionError);
+            reject({
+                status: "FAILURE",
+                message: `Failed while getting connection for transaction ${connectionError}`
+            });
+
+        } finally {
+            if (!connection._pool) {
+                connection.release();
+                console.log('Database connection released.');
+            }
+        }
+    });
+};
