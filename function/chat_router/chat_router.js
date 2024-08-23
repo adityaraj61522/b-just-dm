@@ -60,7 +60,7 @@ exports.getChatList = async function (request, response) {
             }
         }
         let chatList = await chatService.getChatList(request.headers.userDetails.user_id);
-        if (!chatList || chatList.status !== "SUCCESS" || !chatList.data || chatList.data.length < 1) {
+        if (!chatList || chatList.status !== "SUCCESS" || !chatList.data) {
             throw {
                 status: "FAILURE",
                 error: chatList
