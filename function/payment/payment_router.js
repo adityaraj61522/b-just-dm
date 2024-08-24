@@ -89,3 +89,27 @@ exports.payToUnlockChat = async function (request, response) {
         handleError('addBalance', e, response);
     }
 };
+
+exports.encryptDecrypt = async function (request, response) {
+    try {
+        if (!request.headers.id) {
+            throw {
+                code: 400,
+                status: "BAD_REQUEST"
+            };
+        }
+        let data = "";
+        if (request.headers.type == "encrypt") {
+            data = await crypto.encrypt(request.headers.id)
+        } else {
+            data = await crypto.decrypt(request.headers.id)
+        }
+        response.status(200).send({
+            code: 200,
+            status: "SUCCESS",
+            data: data
+        });
+    } catch (e) {
+        handleError('addBalance', e, response);
+    }
+};

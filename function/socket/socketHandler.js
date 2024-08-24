@@ -8,9 +8,12 @@ module.exports = (io) => {
         clients.add(socket.id);
         console.log('New client connected:', socket.id);
 
+
         socket.on('joinRoom', async (roomInfo) => {
-            socket.join(roomInfo.roomId);
-            console.log(`Client ${socket.id} joined room ${roomInfo.roomId}`);
+            let roomName = `${roomInfo.senderId}_${roomInfo.receiverId}`
+            socket.join(roomName);
+            console.log(`the Client ${socket.id} has joined room ${roomName}---------------------------------------`);
+            console.log(`Client ${socket.id} joined room ${roomName}`);
             const {
                 roomId,
                 senderId,
@@ -49,7 +52,10 @@ module.exports = (io) => {
                 console.error('Failed to insert message:', saveChatMessage);
                 return;
             };
-            io.to(roomId).emit('receiveMessage', message);
+            message.sent = false;
+            let roomName = `${receiverId}_${senderId}`;
+            io.to(roomName).emit('receiveMessage', message);
+            console.log(`the Client ${socket.id} has sent  message in room ${roomName}-- message = ${JSON.stringify(message)}-------------------------------------`);
         });
 
         socket.on('disconnect', () => {

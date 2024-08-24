@@ -143,7 +143,7 @@ exports.newRoomCreation = function (request, chatWith) {
                     message: "The requested chat with user doesn't exist!!!!"
                 });
             } else {
-                let roomExistenceQuery = `SELECT * FROM linket_chat_room lcr INNER JOIN linket_user lu ON lu.user_name= '${chatWith}' WHERE (lcr.participant_1=lu.user_id OR lcr.participant_2=lu.user_id)`
+                let roomExistenceQuery = `SELECT * FROM linket_chat_room lcr INNER JOIN linket_user lu ON lu.user_name= '${chatWith}' WHERE (lcr.participant_1=lu.user_id OR lcr.participant_2=lu.user_id) AND (lcr.participant_1=${request.headers.userDetails.user_id} OR lcr.participant_2=${request.headers.userDetails.user_id})`
                 const roomExistenceQueryRes = await db.executeQuery(roomExistenceQuery);
                 if (!roomExistenceQueryRes) {
                     throw {
@@ -169,6 +169,7 @@ exports.newRoomCreation = function (request, chatWith) {
                         status: "CHAT_ROOM_EXISTS",
                         message: "Room Already Exists!!!!"
                     });
+                    return;
                 }
             }
             console.log(queryRes);
