@@ -96,6 +96,7 @@ exports.getChatsByUserId = function (roomId, forUserId) {
                                 jdc.sender_id,
                                 jdc.receiver_id,
                                 jdc.chat_text as chatText,
+                                jdc.chat_img as chatImg,
                                 DATE_FORMAT(jdc.chat_date, '%d %b %y %l:%i %p') as chatDate,
                                 CASE
                                     WHEN jdc.sender_id = ${forUserId} THEN 'Y'
