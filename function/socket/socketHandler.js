@@ -67,8 +67,8 @@ module.exports = (io) => {
 async function saveChat(chatObj) {
     return new Promise(async (resolve, reject) => {
         try {
-            chatObj.chatImg = chatObj.chatImg ? chatObj.chatImg : 'null';
-            const saveChatQuery = `INSERT INTO linket_chat (room_id, sender_id, receiver_id, chat_text, chat_img) VALUES (${chatObj.roomId}, ${chatObj.senderId}, ${chatObj.receiverId}, '${chatObj.chatText}', '${chatObj.chatImg}')`;
+            chatObj.chatImg = chatObj.chatImg ? `'${chatObj.chatImg}'` : null;
+            const saveChatQuery = `INSERT INTO linket_chat (room_id, sender_id, receiver_id, chat_text, chat_img) VALUES (${chatObj.roomId}, ${chatObj.senderId}, ${chatObj.receiverId}, '${chatObj.chatText}', ${chatObj.chatImg})`;
             const queryRes = await db.executeQuery(saveChatQuery);
             if (!queryRes) {
                 console.error('Failed to insert message:', err.stack);
