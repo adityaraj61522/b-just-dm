@@ -34,6 +34,7 @@ exports.getChatList = function (forUserId) {
                                 lu.user_id as userId,
                                 lu.name,
                                 lu.user_name as userName,
+                                lu.picture_url as picture,
                                 lu.rate,
                                 lc.chat_text as chatText,
                                 lc.chat_img as chatImg,
@@ -67,8 +68,8 @@ exports.getChatList = function (forUserId) {
                             GROUP BY
                                 lcr.room_id
                             ORDER BY
-                                lc.chat_date,
-                                lcr.room_creation_date`;
+                                lc.chat_date DESC,
+                                lcr.room_creation_date DESC`;
             console.log('getChatQuery ============ ' + getChatQuery);
             const queryRes = await db.executeQuery(getChatQuery);
             if (!queryRes) throw {

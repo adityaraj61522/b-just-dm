@@ -217,7 +217,7 @@ function processUserData(userData) {
     givenName: userData.given_name,
     familyName: userData.family_name,
     email: userData.email,
-    picture: userData.picture,
+    picture: userData.picture_url,
     rate: userData.rate,
     balance: userData.balance,
     userName: userData.user_name,
